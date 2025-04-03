@@ -5,10 +5,10 @@ on:
     types: [edited, labeled]
   workflow_call:
     inputs:
-      post:
+      post-tag:
         required: false
-        default: false
-        type: boolean
+        default: 'post'
+        type: string
 
 
 jobs:
@@ -25,8 +25,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Create issue as Markdown file for Post
-        if: github.event.label.name == 'post'
-        if: inputs.post
+        if: github.event.label.name == inputs.post
         run: |
           path_post="_posts/"
           file_date="${{ github.event.issue.created_at }}"

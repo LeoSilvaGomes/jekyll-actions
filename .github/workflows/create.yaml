@@ -1,8 +1,6 @@
 name: Create Post Jekyll
 
 on:
-  issues:
-    types: [edited, labeled]
   workflow_call:
     inputs:
       post-tag:

@@ -1,0 +1,49 @@
+name: Git Jekyll Actions
+description: 'Integrate issues on github with jekyll structure for facilitate pages post creation'
+
+author: Leonardo Gomes <leonardodasigomes@gmail.com>
+
+inputs:
+  post-tag:
+    required: false
+    default: 'post'
+    type: string
+
+outputs:
+  changes_detected:
+    description: Value is "true", if the repository was dirty and file changes have been detected. Value is "false", if no changes have been detected.
+  commit_hash:
+    description: Full hash of the created commit. Only present if the "changes_detected" output is "true".
+
+runs:
+  - name: Set up Git user
+    run: |
+      git config --global user.name "github-actions[bot]"
+      git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+  - name: Create issue as Markdown file for Post
+    if: github.event.label.name == inputs.post
+    run: |
+      path_post="_posts/"
+      file_date="${{ github.event.issue.created_at }}"
+      file_name="${file_date:0:10}-post-${{ github.event.issue.number }}.md"
+      file_path="${path_post}${file_name}"
+
+      echo "---" >> ${file_path}
+      echo "layout: post" >> ${file_path}
+      echo "title: ${{ github.event.issue.title }}" >> ${file_path}
+      echo "date: ${{ github.event.issue.created_at }}" >> ${file_path}
+      echo "author: ${{ github.event.issue.user.login }}" >> ${file_path}
+      # echo "url: ${{ github.event.issue.html_url }}" >> ${file_path} 
+      echo "${{ github.event.issue.body }}" >> ${file_path}
+    shell: bash
+
+  - name: Commit and Push changes
+    uses: stefanzweifel/git-auto-commit-action@v4
+    with:
+      commit_message: "Create post ${{ github.event.issue.title }}"
+      branch: main
+
+branding:
+  icon: 'git-commit'
+  color: orange

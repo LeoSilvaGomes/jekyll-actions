@@ -1,0 +1,49 @@
+name: Create Post Jekyll
+
+on:
+  issues:
+    types: [edited, labeled]
+  workflow_call:
+    inputs:
+      post:
+        required: false
+        default: false
+        type: boolean
+
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Git user
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create issue as Markdown file for Post
+        if: github.event.label.name == 'post'
+        if: inputs.post
+        run: |
+          path_post="_posts/"
+          file_date="${{ github.event.issue.created_at }}"
+          file_name="${file_date:0:10}-post-${{ github.event.issue.number }}.md"
+          file_path="${path_post}${file_name}"
+
+          echo "---" >> ${file_path}
+          echo "layout: post" >> ${file_path}
+          echo "title: ${{ github.event.issue.title }}" >> ${file_path}
+          echo "date: ${{ github.event.issue.created_at }}" >> ${file_path}
+          echo "author: ${{ github.event.issue.user.login }}" >> ${file_path}
+          # echo "url: ${{ github.event.issue.html_url }}" >> ${file_path} 
+          echo "${{ github.event.issue.body }}" >> ${file_path}
+        shell: bash
+
+      - name: Commit and Push changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Create post ${{ github.event.issue.title }}"
+          branch: main

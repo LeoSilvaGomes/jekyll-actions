@@ -8,7 +8,6 @@ on:
         default: 'post'
         type: string
 
-
 jobs:
   create:
     runs-on: ubuntu-latest
@@ -23,7 +22,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Create issue as Markdown file for Post
-        if: github.event.label.name == inputs.post
+        if: github.event.label.name == inputs.post-tag
         run: |
           path_post="_posts/"
           file_date="${{ github.event.issue.created_at }}"
